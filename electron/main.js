@@ -5,6 +5,16 @@ const { autoUpdater } = require('electron-updater');
 let win = null;
 let tray = null;
 
+ipcMain.on('resize-window', (event, { width, height }) => {
+  if (win) win.setSize(width, height, true);
+});
+
+// Handle Save Dialog
+ipcMain.handle('show-save-dialog', async (event, options) => {
+  const result = await dialog.showSaveDialog(win, options);
+  return result;
+});
+
 function createWindow() {
   win = new BrowserWindow({
     width: 320,
@@ -17,15 +27,7 @@ function createWindow() {
     },
   });
 
-  ipcMain.on('resize-window', (event, { width, height }) => {
-    if (win) win.setSize(width, height, true);
-  });
 
-  // Handle Save Dialog
-  ipcMain.handle('show-save-dialog', async (event, options) => {
-    const result = await dialog.showSaveDialog(win, options);
-    return result;
-  });
 
   if (process.env.NODE_ENV !== 'production') {
     win.loadURL('http://localhost:5173').catch(() => {
